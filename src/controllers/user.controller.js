@@ -1,9 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js"
 import { User} from "../models/user.model.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import {uploadOnCloudinary,deleteOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
 
@@ -81,7 +81,7 @@ const registerUser = asyncHandler( async (req, res) => {
         coverImage: coverImage?.url || "",
         email, 
         password,
-        username: username.toLowerCase()
+        username: username
     })
 
     const createdUser = await User.findById(user._id).select(
@@ -293,7 +293,10 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
         throw new ApiError(400, "Avatar file is missing")
     }
 
+
     //TODO: delete old image - assignment
+    
+    const deleteAvatar = await deleteOnCloudinary(req.user?._id.avatar);
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
@@ -328,6 +331,7 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
 
     //TODO: delete old image - assignment
 
+    const deleteCoverImage = await deleteOnCloudinary(req.user?._id.coverImage);
 
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
