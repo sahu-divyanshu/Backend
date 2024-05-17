@@ -7,7 +7,7 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import {uploadOnCloudinary,deleteOnCloudinary} from "../utils/cloudinary.js"
 
 
-const checkVideoAuth = async(videoId,owner){
+const checkVideoAuth = async(videoId,owner) =>{
     const isVideo = await Video.findById(videoId)
     if(!isVideo){
         throw new ApiError(400,"invalid video id")
@@ -74,13 +74,13 @@ const getAllVideos = asyncHandler(async (req, res) => {
             }
         ]);
 
-        const sendVideos = await Video.aggregatePaginate(videos, options);
+        // const sendVideos = await Video.aggregatePaginate(videos, options);
 
-        if (!sendVideos.length) {
+        if (!videos.length) {
             throw new ApiError(500, "Videos are missing");
         }
 
-        return res.status(200).json(new ApiResponse(200, { sendVideos }, "Videos fetched successfully"));
+        return res.status(200).json(new ApiResponse(200, { videos }, "Videos fetched successfully"));
 
     } catch (err) {
         console.log(err);
@@ -107,14 +107,15 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400,"video is required")
     }
     const video = await uploadOnCloudinary(videoLocalPath)
+    console.log(video)
     const thumbnail = thumbnailLocalPath ? await uploadOnCloudinary(thumbnailLocalPath) : null;
- 
+     console.log(thumbnail)
     const videoUpload = await Video.create({
         title,
         description,
         videoFile:video.url,
         thumbnail:thumbnail.url,
-        duration: videoFile.duration,
+        duration: video.duration,
         owner: req.user._id,    
     })
     if(!videoUpload){
