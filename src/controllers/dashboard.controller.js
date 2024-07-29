@@ -68,44 +68,45 @@ const getChannelStats = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200,{channelStats},"channel stats fetched successfully"))
 })
 
-const getChannelVideos = asyncHandler(async (req, res) => {
-    // TODO: Get all the videos uploaded by the channel
-    const user = req.user._id;
-    if(!user) {throw new ApiError(400,"user not found")}
-    
+const getChannelVideos = asyncHandler(async (req, res) => {  
     const videos = await Video.aggregate([
         {
-            $match: {
-                owner: new mongoose.Types.ObjectId(user)
-            }
+          $match: {
+            owner: new mongoose.Types.ObjectId(req.user._id),
+          },
         },
         {
-            $lookup:{
-                from:"users",
-                localField:"owner",
-                foreignField:"_id",
-                as:"createdBy",
-                pipeline:{
-                    $project:{
-                        fullName:1,
-                        username:1,
-                        avatar:1
-                    }
-                }
-            }
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "createdBy",
+            pipeline: [
+              {
+                $project: {
+                  fullName: 1,
+                  userName: 1,
+                  avatar: 1,
+                },
+              },
+            ],
+          },
         },
         {
-            $addFields:{
-                createdBy:{$arrayElemAt:["$createdBy",0]}
-            }
-        }
-    ])
-
+          $addFields: {
+            createdBy: {
+              $first: "$createdBy",
+            },
+          },
+        },
+      ]);
+    console.log(videos);
     if (!videos.length) throw new ApiError(500, "videos is missing");
-    return res.status(200).json(new ApiResponse(200, "videos fetched successfully", {videos}))
-        
-    
-})
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, videos, "channel videos fetch successfully"));
+  });
 
 export {
     getChannelStats, 

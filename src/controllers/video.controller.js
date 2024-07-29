@@ -80,7 +80,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             throw new ApiError(500, "Videos are missing");
         }
 
-        return res.status(200).json(new ApiResponse(200, { videos }, "Videos fetched successfully"));
+        return res.status(200).json(new ApiResponse(200,  videos , "Videos fetched successfully"));
 
     } catch (err) {
         console.log(err);
@@ -121,7 +121,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if(!videoUpload){
         throw new ApiError(500,"unable to upload ")
     }
-    return res.status(200).json(new ApiResponse(200,{videoUpload},"video uploaded successfully"))
+    return res.status(200).json(new ApiResponse(200,videoUpload,"video uploaded successfully"))
 
     
 })
@@ -265,7 +265,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         }
     )
    
-    return res.status(200).json(new ApiResponse(200,{video},"updated succcessfully"))
+    return res.status(200).json(new ApiResponse(200,video,"updated succcessfully"))
 
 })
 
